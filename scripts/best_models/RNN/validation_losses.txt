@@ -1,0 +1,1 @@
+Configuration 1 Validation Loss: 0.07402996718883514
