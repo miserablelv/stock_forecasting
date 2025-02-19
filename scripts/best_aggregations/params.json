@@ -1,0 +1,1 @@
+{"combinations": [["GRU"], ["XGBoost", "GRU"], ["XGBoost", "GRU", "LSTM"], ["SARIMA", "XGBoost", "RNN", "GRU"], ["SARIMA", "ARNN", "RNN", "GRU", "LSTM"], ["SARIMA", "XGBoost", "ARNN", "RNN", "GRU", "LSTM"]], "aggregations": ["max", "mean", "median", "median", "max", "max"]}
