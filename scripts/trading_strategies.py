@@ -3,8 +3,6 @@ from pyalgotrade.technical import ma, rsi, macd
 
 import numpy as np
 
-from data import *
-
 from models.models_utils import get_initial_context
 
 from time import sleep
@@ -13,8 +11,7 @@ from sys import exit
 
 import datetime
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print("Using device:", device)
+# from device import device
 
 class PredictionBasedStrategy(strategy.BacktestingStrategy):
     def __init__(self, feed, instrument, predictions, data, strategy_params, indicators):
@@ -538,4 +535,55 @@ class BuyAndHoldStrategy(strategy.BacktestingStrategy):
         # if realized_return > 0:
 
 # def calculate_compound_attributes(results_df):
+
+import pandas as pd
+
+from data import adjust_trainval_set
+
+import talib
+
+
+from save import load_model
+
+def calculate_indicators_for_strategy(data, model_params, indicator_params, set='val_3'): # optimize hyperparameters man
+    train_data, val_1_data, val_2_data, val_3_data, test_data = data
+    if set == 'val_3':
+        trainval_data = pd.concat((train_data, val_1_data, val_2_data, val_3_data))
+        indicators_len = len(val_3_data)
+        test_data = val_3_data
+    else:
+        trainval_data = pd.concat(data)
+        indicators_len = len(test_data) # should be the same right? not always
     
+    trainval_data = adjust_trainval_set(trainval_data, model_params)
+
+    index = trainval_data.index
+
+    adj_close = trainval_data['Adj Close'].values.astype(np.float64)
+    high = trainval_data['High'].values.astype(np.float64)
+    low = trainval_data['Low'].values.astype(np.float64)
+    volume = trainval_data['Volume'].values.astype(np.float64)
+
+    # print(f"Adj close len {len(adj_close)}, index len {len(index)}")
+    
+    rsi = pd.DataFrame(talib.RSI(adj_close, timeperiod=indicator_params['rsi_time_period']), index=index)
+    macd, macd_signal, _ = talib.MACD(
+        volume,
+        fastperiod=indicator_params['macd_fast_period'], slowperiod=indicator_params['macd_slow_period'], signalperiod=indicator_params['signal_period']
+    )
+    macd = pd.DataFrame(macd, index=index)
+    macd_signal = pd.DataFrame(macd_signal, index=index)
+    obv = pd.DataFrame(talib.OBV(adj_close, volume), index=index) # [-len(val_3_data):]
+    atr = pd.DataFrame(talib.ATR(
+        high,
+        low,
+        adj_close,
+        timeperiod=indicator_params['atr_period']
+    ), index=index)
+    return rsi, macd, macd_signal, obv, atr
+
+def prepare_indicators(model_name, indicator_params, test_set='val_3'):
+    model_configs = load_model(model_name, test_set)
+    model_instance, model_params, data = model_configs[0]
+    indicators = calculate_indicators_for_strategy(data, model_params, indicator_params, test_set)
+    return indicators

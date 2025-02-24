@@ -25,17 +25,16 @@ import sys
 
 from joblib import dump, load
 
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"Using device {device}")
+from device import device
 
 def read_ticker(ticker):
     data = None
     while data is None:
         try:
-            data = yf.download(ticker)
+            data = yf.download(ticker, multi_level_index=False, auto_adjust=False, progress=False)
         except:
             sleep(1)
+    # print(f"Data head {data.head}")
     return data
         
 import seaborn as sns
@@ -94,7 +93,7 @@ def read_data(group_by_weeks=False):
     if spx.index[-1] > current_date:
         spx = spx[:-1] # remove the last row, as it is incomplete
 
-    print(f"Last rows {spx[-3:]}")
+    # print(f"Last rows {spx[-3:]}")
     
     num_features = spx.shape[1] + 1 # +1 because of the way we are splitting month
     
@@ -136,7 +135,7 @@ def split_data(data, config):
     val_3_data = data[idx_val_2:idx_val_3]
     test_data = data[idx_val_3:]
 
-    print(f"Train data shape {train_data.shape}, val_1_data shape {val_1_data.shape}, val_2_data shape {val_2_data.shape}, val_3_data shape {val_3_data.shape}, test_data shape {test_data.shape}")
+    print(f"📊 Data sets shape: {train_data.shape}; {val_1_data.shape}; {val_2_data.shape}; {val_3_data.shape}; {test_data.shape}")
 
     if (len(train_data) - first_block_stride - second_block_stride - last_block_stride) % rest_blocks_stride != 0:
         raise Exception("Training data not multiple")
@@ -149,7 +148,7 @@ def split_data(data, config):
     if (len(test_data) - second_block_stride - last_block_stride) % rest_blocks_stride != 0:
         raise Exception("Test set data not multiple")
 
-    print(f"SUCCESSFUL SPLIT!")
+    print(f"✅ Successful split!\n")
     data_sets = (train_data, val_1_data, val_2_data, val_3_data, test_data)
 
     return data_sets
@@ -175,7 +174,7 @@ def get_trainval_data_split(data, model_params, test_set):
 
 
 scalers_dict = {'MinMaxScaler': MinMaxScaler((-1,1)),
-               'StandardScaler': StandardScaler()}
+               'StandardScaler': StandardScaler()} # needed?
 
 
 from sklearn.preprocessing import PowerTransformer
@@ -415,7 +414,7 @@ def check_split(len_context, len_following, config, is_train):
     rest_block_size = batch_len = step * batch_size
     last_block_size = batch_size * step - stride
 
-    print(f"\nLen of context {len_context}, len of following {len_following}, is train {is_train}, first block size {first_block_size}, second block size {second_block_size}, rest block size {rest_block_size}")
+    # print(f"\nLen of context {len_context}, len of following {len_following}, is train {is_train}, first block size {first_block_size}, second block size {second_block_size}, rest block size {rest_block_size}")
 
     if (len_context - first_block_size) % rest_block_size != 0:
         raise Error("Context not multiple")
@@ -424,11 +423,18 @@ def check_split(len_context, len_following, config, is_train):
         raise Error("Following not multiple")
 
     return
+
+
+def get_predictions_df(predictions, reference_model, set): ## makes sense? they are already indexed
+    test_data_path = f"{os.getcwd()}/datasets/{set}"
+    test_data = load_data(test_data_path)
+    predictions_df = pd.DataFrame(predictions, index=test_data.index)
+    return predictions_df
         
     
 
 def split_set(config, context_len, previous_data, data):
-    print(f"Full data len {len(data)}")
+    # print(f"Full data len {len(data)}")
     if previous_data is None:
         context = data[:context_len]
         following = data[context_len:]

@@ -1,6 +1,8 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
+plt.style.use('dark_background')
+
 def visualize_monthly_data(data):
     plt.style.use("dark_background")
     
@@ -181,10 +183,3 @@ def plot_winrate_comparison(strategies_wr):
     plt.grid(axis='y')
     
     plt.show()
-
-def calculate_wr(strategy):
-    try:
-        wr = (strategy.wins / (strategy.wins + strategy.losses)) * 100
-    except ZeroDivisionError:
-        wr = 0
-    return wr

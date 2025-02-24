@@ -16,12 +16,22 @@ import json
 
 import glob
 
-from data import undo_general_treatment
-
 import shutil
 
 import re
 
+import joblib
+
+
+def get_model_func(model): # repeated
+    if model=='LastKMedian':
+        return get_naive_model
+    elif model=='SARIMA':
+        return get_statistical_model
+    elif model == 'ARNN' or model == 'XGBoost':
+        return get_ML_model
+    else:
+        return get_DL_model
 
 
 def save_deploy_trained_model(trained_model):
@@ -278,27 +288,28 @@ def save_agg_predictions(models, predictions, index=None):
     return
 
 def save_best_aggregations(best_combinations, best_aggregation_funcs, best_predictions, best_losses):
-    print(f"Saving best aggregations...")
+    print("Saving best aggregations...")
     base_path = os.path.join(os.getcwd(), f"best_aggregations")
+
+    if not os.path.exists(base_path):
+        os.makedirs(target_path)
 
     text_path = f"{base_path}/performance_ranking.txt"
 
     with open(text_path, "w") as f:
         f.write("")
 
+    best_aggs_dict = {'combinations': best_combinations,
+                      'aggregations': best_aggregation_funcs,
+                      'losses': best_losses}
+
+    params_path = f"{base_path}/params.json"
+
+    with open(params_path, "w") as f:
+        json.dump(best_aggs_dict, f)
+
     for i in range(len(best_combinations)):
         target_path = f"{base_path}/{i+1}"
-
-        if not os.path.exists(target_path):
-            os.makedirs(target_path)
-        
-        params_path = f"{base_path}/params.json"
-        best_aggs_dict = {'combinations': best_combinations,
-                          'aggregations': best_aggregation_funcs}
-        with open(params_path, "w") as f:
-            json.dump(best_aggs_dict, f)
-    
-        # make df
         
         best_predictions.to_csv(f"{target_path}/val_2_predictions.csv")
 
@@ -307,6 +318,24 @@ def save_best_aggregations(best_combinations, best_aggregation_funcs, best_predi
     
     return
 
+
+
+# def load_best_aggregations():
+#     print("Saving best aggregations...")
+#     base_path = os.path.join(os.getcwd(), f"best_aggregations")
+
+#     best_aggs_dict = {'combinations': best_combinations,
+#                       'aggregations': best_aggregation_funcs}
+
+#     params_path = f"{base_path}/params.json"
+
+#     with open(params_path, "r") as f:
+#         best_aggs_dict = json.load(f)
+    
+#     return best_aggs_dict
+
+
+
 def load_best_aggregation_params():
     path = os.path.join(os.getcwd(), "best_aggregations/params.json")
     with open(path, "r") as f:
@@ -314,7 +343,7 @@ def load_best_aggregation_params():
     return model_params
 
 
-def select_best_aggregation_number():
+def select_best_aggregation_number(): # unnecessary with the addition of "losses" to the dictionary
     file_path = f"{os.getcwd()}/best_aggregations/performance_ranking.txt"
 
     performances = {}
@@ -329,15 +358,12 @@ def select_best_aggregation_number():
 
     min_loss = np.min(list(performances.values()))
 
-    print(f"Min loss {min_loss}")
-    print(f"Performances values {performances.values()}")
-
     best_combinations = [n_models for n_models, loss in performances.items() if performances[n_models] == min_loss]
-    print(best_combinations)
+    # print(best_combinations)
 
     best_n = np.max(best_combinations)
 
-    print(f"Best choice: {best_n} models with a loss of {min_loss}")
+    print(f"Best choice: {best_n} models with a loss of {min_loss} on validation data")
     
     return best_n
     
@@ -398,10 +424,14 @@ def remove_all_files(folder):
 def load_models_losses(models_list):
     losses_dict = {}
     base_path = os.path.join(os.getcwd(), "best_models")
+
+    print(f"◌Loading models losses...")
+
     for model in models_list:
         losses_dict[model] = []
+
         file_path = f"{base_path}/{model}/validation_losses.txt"
-        print(f"Trying to load models losses from {file_path}...")
+        
         if (os.path.exists(file_path)):
             with open(file_path, "r") as file:
                 for line in file:
@@ -441,19 +471,8 @@ def save_model(model_name, model_config, model_instance, set='val_1'): # is it w
         torch.save(model_instance.state_dict(), instance_path+".pth")
         
         
-    print("All configurations saved successfully.")
+    print(f"✅ Best {model_name} configuration saved successfully.")
     return
-
-    
-def get_model_func(model):
-    if model=='LastKMedian':
-        return get_naive_model
-    elif model=='SARIMA':
-        return get_statistical_model
-    elif model == 'ARNN' or model == 'XGBoost':
-        return get_ML_model
-    else:
-        return get_DL_model
 
 
 from statsmodels.tsa.statespace.sarimax import SARIMAXResults
@@ -474,11 +493,11 @@ def load_model(model_name, set='train'):
     model_instance_path = glob.glob(f"{base_path}/{set}/instance.*")
     if model_instance_path:    
         if model_name == 'ARNN':
-            model.model = model.model.load_state_dict(torch.load(model_instance_path[0], weights_only=False))
+            model.model = torch.load(model_instance_path[0], weights_only=False)
         elif model_name == 'XGBoost':
             model.model = model.model.load_model(model_instance_path[0])
         else:
-            print(f"Loading {model_name} from {model_instance_path[0]}")
+            # print(f"Loading {model_name} from {model_instance_path[0]}")
             model = torch.load(model_instance_path[0], weights_only=False) # why like this?
         
     data = load_datasets()
@@ -488,7 +507,7 @@ def load_model(model_name, set='train'):
 
     configs.append((model, model_params, data))
     
-    print(f"{model_name} configurations loaded successfully.")
+    # print(f"{model_name} configurations loaded successfully.")
 
     return configs
 
@@ -523,7 +542,7 @@ def save_predictions_targets(model_name, test_set, test_predictions, test_target
 
     # save transformers? 
     
-    print("PREDICTIONS AND TARGETS SAVED SUCCESSFULLY")
+    print(f"✅ {scale} predictions and targets saved for {model_name} in {test_set}\n")
     return
 
 
