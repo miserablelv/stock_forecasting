@@ -16,8 +16,6 @@ images/*
 !scripts/best_aggregations/
 
 !scripts/best_models/*
-!scripts/best_strategies/*
-!scripts/best_aggregations/*
 
 !scripts/data.py
 !scripts/optimization.py
