@@ -1,0 +1,32 @@
+# Ignore everything by default
+*
+
+# Allow the scripts/ and images/ folders
+!scripts/
+!images/
+
+# Ignore everything inside scripts/ and images/ first
+scripts/*
+images/*
+
+# Allow only specific files and directories inside scripts/
+!scripts/models/
+!scripts/best_models/
+!scripts/best_strategies/
+!scripts/best_aggregations/
+
+!scripts/best_models/*
+!scripts/best_strategies/*
+!scripts/best_aggregations/*
+
+!scripts/data.py
+!scripts/optimization.py
+!scripts/trading_strategies.py
+!scripts/metrics.py
+!scripts/stock_predictor.ipynb
+!scripts/device.py
+!scripts/aggregation.py
+!scripts/save.py
+!scripts/visualize.png
+
+!.gitignore

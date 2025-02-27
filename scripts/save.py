@@ -288,7 +288,7 @@ def save_agg_predictions(models, predictions, index=None):
     return
 
 def save_best_aggregations(best_combinations, best_aggregation_funcs, best_predictions, best_losses):
-    print("Saving best aggregations...")
+    print("💾 Saving best aggregations...")
     base_path = os.path.join(os.getcwd(), f"best_aggregations")
 
     if not os.path.exists(base_path):

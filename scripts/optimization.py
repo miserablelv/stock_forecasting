@@ -59,6 +59,9 @@ def get_top_n_models(model_dict, n):
 # optimize based on loss
 def create_objective_loss(data):
     def objective(params):
+        trial_number = len(trials.trials)  # Get current trial number
+        print(f"🔄 Running Trial #{trial_number} with params: {params}")
+    
         train_data, val_1_data, val_2_data, val_3_data, test_data = data
         scaled_train_data, scaled_val_1_data, detrender, deseasonalizer = apply_general_treatment(train_data, val_1_data, params['normalization']['general_treatment'])
 
@@ -283,7 +286,7 @@ def compare_all_models_combinations(models_list, test_set="val_2"):
                 best_predictions = aggregated_predictions
 
     best_index = np.argmin(min_losses)
-    print(f"Min loss with models {best_combinations[best_index]} and aggregating with{best_aggregation_funcs[best_index]}: {np.min(min_losses)}")
+    print(f"🏆 Min loss with models {best_combinations[best_index]} and aggregating with{best_aggregation_funcs[best_index]}: {np.min(min_losses)}")
 
     # save the best config
     best_predictions_df = pd.DataFrame(best_predictions, index=test_data.index)
@@ -398,7 +401,7 @@ def evaluate_strategy_config(trained_model, strategy_params, test_predictions, t
     # profit = predictions_strategy.getProfit()
     profit = round(((strategy.getBroker().getEquity()-strategy.initial_investment)/strategy.initial_investment)*100, 2)
 
-    print(f"\n\nPROFIT: {profit}%\n\n")    
+    print(f"\n💰 PROFIT: {profit}%\n")    
 
     return strategy, profit
 
