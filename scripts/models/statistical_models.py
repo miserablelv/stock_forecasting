@@ -1,5 +1,6 @@
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 import pandas as pd
+import numpy as np
 from models.models_utils import calculate_loss
 from data import recover_original_prediction, get_dataloader
 from time import sleep
@@ -92,8 +93,8 @@ class SARIMA:
                 extra_scaled_predictions.extend(scaled_prediction)
                 # we'll have to recover in common scale too
             k += 1
-            if k % 10 == 0:
-                print(f"Validating SARIMA... {k}")
+            # if k % 10 == 0:
+                # print(f"Validating SARIMA... {k}")
 
         loss = calculate_loss(log_predictions, log_targets, self.config)
         # print(f"SARIMA val loss {loss}")

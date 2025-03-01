@@ -11,6 +11,8 @@ from sys import exit
 
 import datetime
 
+import logging
+
 # from device import device
 
 class PredictionBasedStrategy(strategy.BacktestingStrategy):
@@ -63,7 +65,11 @@ class PredictionBasedStrategy(strategy.BacktestingStrategy):
         adj_close = np.array(feed[instrument].getAdjCloseDataSeries())
 
         self.rsi, self.macd, self.macd_signal, self.obv, self.atr = indicators
-        
+
+        logging.basicConfig(level="WARNING")
+        logger = logging.getLogger()
+        logger.setLevel(logging.WARNING)
+            
 
     def calculate_stop_loss(self, share_price):
         atr_value = self.atr[-1]

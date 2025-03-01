@@ -24,7 +24,7 @@ from visualize import visualize_predictions, visualize_models_losses
 from save import *
 
 # Logging
-from logging import log
+import logging
 
 # Trading & Backtesting
 import pyalgotrade
@@ -59,6 +59,7 @@ def get_top_n_models(model_dict, n):
 # optimize based on loss
 def create_objective_loss(data):
     def objective(params):
+    
         train_data, val_1_data, val_2_data, val_3_data, test_data = data
         scaled_train_data, scaled_val_1_data, detrender, deseasonalizer = apply_general_treatment(train_data, val_1_data, params['normalization']['general_treatment'])
 
@@ -283,7 +284,7 @@ def compare_all_models_combinations(models_list, test_set="val_2"):
                 best_predictions = aggregated_predictions
 
     best_index = np.argmin(min_losses)
-    print(f"Min loss with models {best_combinations[best_index]} and aggregating with{best_aggregation_funcs[best_index]}: {np.min(min_losses)}")
+    print(f"📉 Min loss with models {best_combinations[best_index]} and aggregating with{best_aggregation_funcs[best_index]}: {np.min(min_losses)}")
 
     # save the best config
     best_predictions_df = pd.DataFrame(best_predictions, index=test_data.index)
@@ -291,18 +292,14 @@ def compare_all_models_combinations(models_list, test_set="val_2"):
             
     return min_losses, best_combinations, best_aggregation_funcs
 
-from save import load_best_aggregation_params
-import logging
-
 def optimize_strategies(strategy_params, indicators_params):
     model_combinations = load_best_aggregation_params()
 
     best_model_combinations = model_combinations['combinations'] # what about the rest?
     # print(f"Best models combination {best_model_combination}")
     best_model_aggregations = model_combinations['aggregations'] # [1] # take all that are not none
-
-    logging.getLogger("hyperopt.tpe").setLevel(logging.WARNING)
-    best_indicators_strategy = optimize_indicators_strategy(strategy_params)
+    
+    # best_indicators_strategy = optimize_indicators_strategy(strategy_params)
     best_model_strategy = optimize_model_strategies(best_model_combinations, strategy_params, best_model_aggregations, use="PREDICTIONS") 
     best_hybrid_strategy = optimize_model_strategies(best_model_combinations, strategy_params, best_model_aggregations, use="PREDICTIONS+INDICATORS") # different indicators than on pure indicators strategy
 
@@ -336,8 +333,8 @@ def optimize_models_loss(space_loss, models_list, criterion_list, timeframe_list
         min_losses = {}
 
         if os.path.exists(f"{path}{model_name}/validation_losses.txt"):
-            print(f"🎯 {model_name} best configuration already found\n")
-            print(f"🗑️ Do you want to remove it and optimize it again? Y/N\n")
+            print(f"\b🎯 {model_name} best configuration already found\n")
+            print(f"🗑️ Do you want to remove it and optimize it again? Y/N")
             x = input()
             if x == 'Y' or x == 'y':
                 remove_all_files(f"{path}{model_name}/")
@@ -398,8 +395,6 @@ def evaluate_strategy_config(trained_model, strategy_params, test_predictions, t
     # profit = predictions_strategy.getProfit()
     profit = round(((strategy.getBroker().getEquity()-strategy.initial_investment)/strategy.initial_investment)*100, 2)
 
-    print(f"\n\nPROFIT: {profit}%\n\n")    
-
     return strategy, profit
 
 def optimize_indicators_strategy(strategy_params):
@@ -423,8 +418,8 @@ def optimize_indicators_strategy(strategy_params):
 
     strategy_profit = ((best_strategy.results['Equity'].iloc[-1] / best_strategy.results['Equity'].iloc[0]) - 1) * 100
 
-    print(f"\n\n\nBest profit using purely indicators {strategy_profit}%\n\n\n")
-    print(f"Best sharpe {best_trial['result']['sharpe']}")
+    print(f"📈 Best profit using purely indicators {strategy_profit}%\n")
+    print(f"📊 Best sharpe {best_trial['result']['sharpe']}\n")
 
     target_path = f"{base_path}INDICATORS/"
     if not os.path.exists(target_path):
@@ -539,6 +534,8 @@ def test_best_config(use, scale='log', taxes=True):
         predictions = None
         
     strategy, profit = evaluate_strategy_config(None, strategy_params, predictions, targets, feed_path, indicators)
+
+    print(f"\n💰 Profit: {profit}%\n")
     
     sharpe_ratio = calculate_sharpe_ratio(strategy.results)
 
