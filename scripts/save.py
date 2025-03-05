@@ -363,7 +363,7 @@ def select_best_aggregation_number(): # unnecessary with the addition of "losses
 
     best_n = np.max(best_combinations)
 
-    print(f"Best choice: {best_n} models with a loss of {min_loss} on validation data")
+    print(f"🏆 Best choice: {best_n} models with a loss of {min_loss} on validation data")
     
     return best_n
     
@@ -425,7 +425,7 @@ def load_models_losses(models_list):
     losses_dict = {}
     base_path = os.path.join(os.getcwd(), "best_models")
 
-    print(f"◌Loading models losses...")
+    print(f"🔄 Loading models losses...")
 
     for model in models_list:
         losses_dict[model] = []
@@ -542,7 +542,7 @@ def save_predictions_targets(model_name, test_set, test_predictions, test_target
 
     # save transformers? 
     
-    print(f"✅ {scale} predictions and targets saved for {model_name} in {test_set}\n")
+    print(f"✅ {scale} predictions and targets saved for {model_name} in {test_set}")
     return
 
 
