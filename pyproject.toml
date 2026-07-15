@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stock-predictor"
+version = "0.1.0"
+description = "Deep-learning ensemble for S&P 500 weekly price forecasting with automated trading strategies."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # Core scientific stack
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "matplotlib",
+    "seaborn",
+    # Deep learning
+    "torch",
+    # Time series
+    "sktime",
+    "statsmodels",
+    # Machine learning
+    "xgboost",
+    # Market data
+    "yfinance",
+    "pandas-datareader",
+    # Technical analysis
+    "TA-Lib",
+    # Hyperparameter optimisation
+    "hyperopt",
+    # Backtesting
+    "pyalgotrade",
+    # Utilities
+    "missingno",
+    "joblib",
+    "setuptools<70",
+    "ipykernel>=7.3.0",
+    "openpyxl>=3.1.5",
+    "xlrd>=2.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter",
+    "ipykernel",
+    "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

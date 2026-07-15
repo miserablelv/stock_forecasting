@@ -1,30 +1,121 @@
-# Ignore everything by default
-*
+# ────────────────────────────────────────────────
+# Python
+# ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
 
-# Allow the scripts/ and images/ folders
-!scripts/
-!images/
+# ────────────────────────────────────────────────
+# Data
+# ────────────────────────────────────────────────
+data/
 
-# Ignore everything inside scripts/ and images/ first
-scripts/*
-images/*
+# ────────────────────────────────────────────────
+# Jupyter
+# ────────────────────────────────────────────────
+.ipynb_checkpoints/
 
-# Allow only specific files and directories inside scripts/
-!scripts/models/
-!scripts/best_models/
-!scripts/best_strategies/
-!scripts/best_aggregations/
+# Only the main pipeline notebook is committed
+notebooks/
+!notebooks/main.ipynb
 
-!scripts/best_models/*
 
-!scripts/data.py
-!scripts/optimization.py
-!scripts/trading_strategies.py
-!scripts/metrics.py
-!scripts/stock_predictor.ipynb
-!scripts/device.py
-!scripts/aggregation.py
-!scripts/save.py
-!scripts/visualize.png
+# ────────────────────────────────────────────────
+# IDE / OS
+# ────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+Thumbs.db
+.DS_Store
 
-!.gitignore
+# ────────────────────────────────────────────────
+# Global File Ignores (Data & Figures)
+# ────────────────────────────────────────────────
+*.csv
+*.png
+*.jpg
+*.jpeg
+*.JPG
+!**/.gitkeep
+
+# ────────────────────────────────────────────────
+# Data & Models Directories
+# ────────────────────────────────────────────────
+data/
+models/
+best_models/
+best_aggregations/
+best_strategies/
+*.pth
+*.net
+*.joblib
+*.pkl
+
+# Keep best-config JSONs and rankings (small, shareable)
+!models/best/**/*.json
+!models/best/**/*.txt
+
+
+# ────────────────────────────────────────────────
+# Personal notes (not public)
+# ────────────────────────────────────────────────
+Notes/
+
+# ────────────────────────────────────────────────
+# Legacy / archival (all preserved in git history)
+# ────────────────────────────────────────────────
+old_complete_notebook/
+predictions agg/
+safety/
+
+# Old root-level scripts (superseded by src/ + scripts/)
+/deploy.py
+/deployment.py
+/deployment.ipynb
+/optimize.py
+/save.py
+/eda.py
+/data.ipynb
+/optimization.ipynb
+/models.ipynb
+/trading.ipynb
+/extrapolating_model.ipynb
+
+# Old root-level data & artifacts
+/VT_test.csv
+/VT_val.csv
+/VXUS_test.csv
+/VXUS_val.csv
+/best_model.pth
+/checkpoint_ensemble_10_20_epoch.net
+/whole_ensemble_10_20_epoch.pth
+/scripts_Logarithmic Scale.png
+/scripts_Normal Scale.png
+
+# Old root-level notes
+/fundamental_features.txt
+/possible_improvements.txt
+/redo_trading_bot.txt
+
+# Old scripts/ directory (superseded by src/stock_predictor/)
+/scripts/
+
+# ────────────────────────────────────────────────
+# Work in progress
+# ────────────────────────────────────────────────
+!src/models
+src/models/hybrid.py
+
+# ────────────────────────────────────────────────
+# Secrets & credentials (safety net)
+# ────────────────────────────────────────────────
+.env
+*.key
+*.pem

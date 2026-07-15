@@ -1,3 +1,0 @@
-Best profit achieved with indicators: -19.00521826171875
-Best profit achieved with predictions: 50.4214404296875
-Best profit achieved with hybrid: 62.8243818359375
