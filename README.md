@@ -48,8 +48,8 @@ stock_predictor/
 
 ```bash
 # Clone and install in editable mode
-git clone https://github.com/raldanondo/stock_price_forecasting.git
-cd stock_price_forecasting
+git clone https://github.com/raldanondo/stock_market_forecasting.git
+cd stock_market_forecasting
 
 # With pip
 pip install -e ".[dev]"
